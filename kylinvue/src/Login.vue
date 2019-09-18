@@ -85,7 +85,7 @@ export default {
       	var $this = this;
       this.$ajax({
                 url: 'http://localhost:8080/login',
-                method: 'post', // default
+                method: 'post', 
                 params: this.ruleForm,
             }).then(function(res){
                 console.log("认证请求返回结果为:{}",res);
@@ -118,7 +118,7 @@ export default {
     padding: 35px 35px 15px 35px;
     background: #fff;
     border: 1px solid #eaeaea;
-    box-shadow: 0 0 25px #e92020;
+    box-shadow: 0 0 25px #e72a2a;
   }
   .login_title {
     margin: 0px auto 40px auto;
