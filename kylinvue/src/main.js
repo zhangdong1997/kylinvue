@@ -54,6 +54,10 @@ router.beforeEach((to,from,next)=>{
 export const initMenu=()=>{
   axios({
     url:"http://localhost:8080/menu/",
+    method:"get",
+  }).then(function(param){
+       console.log("11111111111{}",param);
+       
   })
 }
 
