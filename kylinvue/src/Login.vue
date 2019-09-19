@@ -2,7 +2,7 @@
   
   <div class="hello" >
     <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="login-container" style="width: 500px;" >
-     <img src="./assets/哪吒.jpg" style="width:300px;height:300px;margin-left:100px;">
+     <img src="./assets/qq.jpg" style="width:300px;height:300px;margin-left:100px;">
    
     <h3 class="login_title">系统登录</h3>
     <el-form-item label="用户名" prop="username">
@@ -12,10 +12,6 @@
   <el-form-item label="密码" prop="password">
     <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
   </el-form-item>
-  
-
-  
-    
   
   <el-form-item>
       <el-checkbox class="login_remember" v-model="checked"
@@ -92,8 +88,10 @@ export default {
                 $this.$message(res.data.msg);
                 if(res.data.code==200){
                     //通过路由跳转页面
-                    $this.$router.replace({path:"/home"});
+                    //$this.$router.replace({path:"/home",res});
                     //并且使用vuex 保存状态信息
+                    $this.$store.commit("login",res.data.object);
+                    $this.$router.push({path: '/home',query:{obj :res.data.object.username}});
                     
                 }
             })
