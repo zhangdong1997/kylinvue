@@ -3,21 +3,20 @@
     <el-container class="home-container" style="height: 500px; border: 1px solid #eee">
       <el-header class="home-header">
         <span class="home_title">快速开发平台</span>
-        <el-dropdown>
-          <span>王小虎</span>
+        <el-dropdown @command="handleCommand">
+          <span>{{this.$store.state.user.username}}</span>
           <i class="el-icon-setting" style="margin-right: 15px"></i>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>查看</el-dropdown-item>
-            <el-dropdown-item>新增</el-dropdown-item>
-            <el-dropdown-item>删除</el-dropdown-item>
+            <el-dropdown-item @click="logout">注销</el-dropdown-item>
+            
           </el-dropdown-menu>
         </el-dropdown>
       </el-header>
 
       <el-container>
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-          <el-menu router>
-            <el-submenu index="1" v-for="item in this.$router.options.routes[1].children" >
+          <el-menu router :unique-opened="true">
+            <el-submenu :index="index+''" v-for="(item,index) in this.$router.options.routes[1].children" >
               <template slot="title">
                 <i class="el-icon-message"></i>
                 {{item.name}}
@@ -43,9 +42,15 @@ export default {
     return {};
   },
   mounted() {
-    let routequery = this.$route.query;
-    this.$message(routequery.obj);
-    console.log(routequery.obj);
+   
+  },
+  methods:{
+    handleCommand (){
+      localStorage.removeItem("user");
+      this.$store.commit('login','');
+      this.$store.commit('initMenu',[]);
+      this.$router.replace({path:"/"});
+    }
   }
 };
 </script>

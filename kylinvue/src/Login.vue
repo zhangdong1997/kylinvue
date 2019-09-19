@@ -91,8 +91,9 @@ export default {
                     //$this.$router.replace({path:"/home",res});
                     //并且使用vuex 保存状态信息
                     $this.$store.commit("login",res.data.object);
-                    $this.$router.push({path: '/home',query:{obj :res.data.object.username}});
-                    
+                   
+                    //通过路由跳转页面
+                    $this.$router.replace({path:"/home"});
                 }
             })
         
