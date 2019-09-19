@@ -7,7 +7,7 @@
           <span>{{this.$store.state.user.username}}</span>
           <i class="el-icon-setting" style="margin-right: 15px"></i>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item @click="logout">注销</el-dropdown-item>
+            <el-dropdown-item >注销</el-dropdown-item>
             
           </el-dropdown-menu>
         </el-dropdown>
