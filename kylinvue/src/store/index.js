@@ -6,7 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state:{
         user:{
-            username:(localStorage.getItem("user")==null||localStorage.getItem("user")=="null"||localStorage.getItem('user')=='')?"尚未登录":localStorage.getItem("user").username,
+            username:(localStorage.getItem("user")==null||localStorage.getItem("user")=="null"||localStorage.getItem('user')=='')?"尚未登录":JSON.parse(localStorage.getItem("user")).username,
         },
         rs:[]
     },

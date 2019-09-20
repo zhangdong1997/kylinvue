@@ -43,6 +43,7 @@ axios.interceptors.response.use(response => {
   return response;
 }, error => {
   console.log('axios.interceptors.response{}', error.response);
+  console.log("222222222222222222222222222222222"+error.response.status);
   if (error.response.status == 401) {
     Message.error("尚未登录");
     localStorage.removeItem('user');
@@ -62,7 +63,8 @@ router.beforeEach((to, from, next) => {
   }
 
   var username = store.state.user.username;
-  if (username == "尚未登录" || username == undefined) {
+  console.log("username==============={}"+store.state.user.username);
+  if (username == "尚未登录" || username==undefined) {
     next({ path: "/" });
     return;
   }
