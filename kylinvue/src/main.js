@@ -43,7 +43,7 @@ router.beforeEach((to, from, next) => {
   }
 
   var username = store.state.user.username;
-  if (username == "尚未登录") {
+  if (username == "尚未登录"||username==undefined) {
     next({ path: "/" });
     return ;
   }
