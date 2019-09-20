@@ -18,6 +18,9 @@
           <img :src="scope.row.userface" width="100px" alt="没有图片" />
         </template>
       </el-table-column>
+      <el-table-column prop="namezh" label="在线职位">
+        
+      </el-table-column>
 
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
@@ -55,6 +58,13 @@
          <el-form-item label="联系地址">
           <el-input v-model="addBean.address" style="width: 300px;"></el-input>
         </el-form-item>
+
+        <el-form-item label="景点图片">
+					<el-upload class="avatar-uploader" action="https://localhost:8080/upload" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+						<img v-if="addBean.userface" :src="addBean.userface" class="avatar" >
+						<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+					</el-upload>
+          </el-form-item>
         
         
       </el-form>
@@ -90,9 +100,9 @@ export default {
     list(page) {
       var self = this;
       this.$ajax
-        .get("http://localhost:8080/user/page?pageNum=" + page)
+        .get("http://localhost:8080/user/selectUserByUsername?pageNum=" + page)
         .then(function(res) {
-          console.log("============={}", res.data.object.records);
+          console.log("============={}", res.data.object);
           self.userList = res.data.object.records;
           self.pagination = res.data.object;
         });
@@ -101,7 +111,7 @@ export default {
       var self = this;
       this.$ajax
         .get(
-          "http://localhost:8080/user/page?pageNum=1&username=" + this.username
+          "http://localhost:8080/user/selectUserByUsername?pageNum=1&username=" + this.username
         )
         .then(function(res) {
           self.userList = res.data.object.records;
@@ -123,10 +133,9 @@ export default {
           console.log("穿进去的对象是：{}",this.addBean);
            var bean = this.addBean;
             this.$ajax({
-                url: 'http://localhost:8080/user',
+                url: 'http://localhost:8080/user/addUser',
                 method: 'post', 
-                emulateJSON: true,
-                data:{bean}
+                params:bean,
                 }).then(function(res){
                  if(res.data.object){
                     alert("添加成功");
@@ -139,7 +148,16 @@ export default {
                  }
             })
 
-    }
+    },
+
+    handleAvatarSuccess (res, file){
+				
+				this.addBean.userface = file.response.url;
+      },
+      
+      beforeAvatarUpload (file){
+				return file;
+			}
   }
 };
 </script>
@@ -154,4 +172,28 @@ export default {
 .el-table .success-row {
   background: #f0f9eb;
 }
+
+.avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>
