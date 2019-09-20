@@ -46,10 +46,22 @@ export default {
   },
   methods:{
     handleCommand (){
-      localStorage.removeItem("user");
-      this.$store.commit('login','');
-      this.$store.commit('initMenu',[]);
-      this.$router.replace({path:"/"});
+      
+      var $this = this;
+          this.$ajax({
+              method:'get',
+              url: 'http://localhost:8080/my/logout'
+          }).then(function(res){
+              console.log(res);
+             $this.$message(res.data.msg);
+              if(res.data.code==200){
+                   localStorage.removeItem('user');
+                    $this.$store.state.rs=[];
+                    $this.$store.state.user='';
+                    $this.$router.replace({path:"/"});
+                    return;
+              }
+          })
     }
   }
 };

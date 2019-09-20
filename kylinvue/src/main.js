@@ -6,6 +6,7 @@ import Home from './home.vue'
 import User from './component/User.vue'
 import Role from './component/role.vue'
 import ElementUI from 'element-ui';
+import {Message} from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import VueRouter from 'vue-router';
 import axios from 'axios'
@@ -36,6 +37,24 @@ const routes = [
 ]
 
 const router = new VueRouter({ routes });
+
+axios.interceptors.response.use(response => {
+  // Do something before response is sent
+  return response;
+}, error => {
+  console.log('axios.interceptors.response{}', error.response);
+  if (error.response.status == 401) {
+    Message.error("尚未登录");
+    localStorage.removeItem('user');
+    store.state.rs = [];
+    store.state.user = '';
+    router.replace({ path: "/" });
+    return;
+  }
+  // Do something with response error
+  return Promise.reject(error);
+});
+
 router.beforeEach((to, from, next) => {
   if (to.path == "/") {
     next();
@@ -43,21 +62,21 @@ router.beforeEach((to, from, next) => {
   }
 
   var username = store.state.user.username;
-  if (username == "尚未登录"||username==undefined) {
+  if (username == "尚未登录" || username == undefined) {
     next({ path: "/" });
-    return ;
+    return;
   }
 
-  console.log("dddddddd{}",store.state.rs);
-  if(store.state.rs.length ==0 ){
-   console.log("判断后的dddddddd{}",store.state.rs);
-   //调用initMenu方法
-   initMenu(router,store);
-   //延迟1秒加载
-   setTimeout(()=>{
-     next();
-   },1000);
-   return ;
+  console.log("dddddddd{}", store.state.rs);
+  if (store.state.rs.length == 0) {
+    console.log("判断后的dddddddd{}", store.state.rs);
+    //调用initMenu方法
+    initMenu(router, store);
+    //延迟1秒加载
+    setTimeout(() => {
+      next();
+    }, 1000);
+    return;
   }
 
   next();
@@ -97,20 +116,20 @@ export const formRouters = (routers) => {
     }
     //声明一个r对象
     let r = {
-      path:element.path,
-      component(resolve){
-            //判断组件component属性开头
-           if(element.component.startWith("User")){
-            require(['./component/' + element.component + '.vue'], resolve)
-           }
-           else if(element.component.startWith("Role")){
-            require(['./component/' + element.component + '.vue'], resolve)
-           }
+      path: element.path,
+      component(resolve) {
+        //判断组件component属性开头
+        if (element.component.startWith("User")) {
+          require(['./component/' + element.component + '.vue'], resolve)
+        }
+        else if (element.component.startWith("Role")) {
+          require(['./component/' + element.component + '.vue'], resolve)
+        }
       },
-      name:element.name,
-      children:children
+      name: element.name,
+      children: children
 
-      
+
     }
     array.push(r);
   });
