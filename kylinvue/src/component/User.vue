@@ -64,8 +64,7 @@
                 :before-upload="beforeAvatarUpload"
                 action="https://jsonplaceholder.typicode.com/posts/"
               >
-                
-                <img v-if="addBean.userface" :src="addBean.userface" class="avatar"   />
+                <img v-if="addBean.userface" :src="addBean.userface" class="avatar" />
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </el-form-item>
@@ -73,6 +72,17 @@
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="addUser">确 定</el-button>
+          </div>
+        </el-dialog>
+
+        <el-dialog title="授权" :visible.sync="dialogFormVisible1" >
+          <el-checkbox-group v-model="rids" >
+            <el-checkbox   v-for="item in roles" :label="item.id" >{{item.nameZh}}</el-checkbox>
+          </el-checkbox-group>
+
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible1 = false">取消授权</el-button>
+            <el-button type="primary" @click="giveRole">确定授权</el-button>
           </div>
         </el-dialog>
       </div>
@@ -89,15 +99,24 @@ export default {
       username: "",
       pagination: [],
       dialogFormVisible: false,
+      dialogFormVisible1: false,
       addBean: {
-        userface:"",
+        userface: ""
       },
       checkname: "",
-      roles:[]
+      roles: [],
+      rids: [],
+      //授权的对象
+      changeRole:{
+        id:"",
+        rids:[]
+      }
+      
     };
   },
   mounted() {
     this.list(1);
+    
   },
   methods: {
     list(page) {
@@ -123,18 +142,48 @@ export default {
         });
     },
 
-//授权
-    handleClick (row){
-       alert(row.id);
-       this.showAllRoles();
+    //开始授权
+    handleClick(row) {
+      
+      var self = this;
+      self.changeRole.id = row.id;
+      this.showAllRoles();
+      this.dialogFormVisible1 = true;
+       axios.get("http://localhost:8080/user/selectRoleByUid?uid="+row.id).then(function(res) {
+         console.log("000000000000000000000"+res.data.object);
+        self.rids = res.data.object;
+        console.log(self.rids);
+      });
+    },
+    //授权
+    giveRole (){//giveRole
+      
+       var self = this;
+       self.changeRole.rids = this.rids;
+       console.log(this.changeRole);
+       let config = { headers: { "Content-Type": "multipart/form-data" } };
+       self.$ajax({
+                url: 'http://localhost:8080/user/giveRole?id='+self.changeRole.id+"&rids="+self.changeRole.rids,
+                method: 'post', 
+            }).then(function(res){
+
+         if(res){
+           self.$message("授权成功");
+           self.dialogFormVisible1 = false;
+           self.list(1);
+          }else{
+            self.$message("授权失败");
+          }
+        })
+       
     },
 
     //显示说有的角色
-    showAllRoles (){
-      var self =this;
-      axios.get("http://localhost:8080/role/getAllRoles").then(function(res){
-           console.log(res);
-      })
+    showAllRoles() {
+      var self = this;
+      axios.get("http://localhost:8080/role/getAllRoles").then(function(res) {
+        self.roles = res.data.object;
+      });
     },
 
     addUser() {
@@ -174,22 +223,23 @@ export default {
     uploadUserFace(file) {
       var self = this;
       let formData = new FormData();
-      formData.append("file",file.file);
-      
+      formData.append("file", file.file);
+
       let config = { headers: { "Content-Type": "multipart/form-data" } };
-       self.$ajax.post("http://localhost:8080/user/upload",formData,config).then(function(res){
-            
-            self.addBean.userface = res.data.url;
-      })
+      self.$ajax
+        .post("http://localhost:8080/user/upload", formData, config)
+        .then(function(res) {
+          self.addBean.userface = res.data.url;
+        });
     },
 
-      handleAvatarSuccess: function(res, file) {
-        this.addBean.userface = file.response.url;
-        console.log(file.response.url);
-      },
-      beforeAvatarUpload: function(file) {
-				return file;
-			}
+    handleAvatarSuccess: function(res, file) {
+      this.addBean.userface = file.response.url;
+      console.log(file.response.url);
+    },
+    beforeAvatarUpload: function(file) {
+      return file;
+    }
   }
 };
 </script>
