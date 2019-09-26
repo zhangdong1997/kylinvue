@@ -5,6 +5,7 @@ import Login from './login.vue'
 import Home from './home.vue'
 import User from './component/User.vue'
 import Role from './component/role.vue'
+import Log from './component/Log.vue'
 import ElementUI from 'element-ui';
 import {Message} from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
@@ -29,7 +30,11 @@ const routes = [
           },
           {
             path: '/role', component: Role, name: ''
+          },
+          {
+            path: '/log', component: Log, name: ''
           }
+
         ]
       }
     ]
@@ -50,6 +55,10 @@ axios.interceptors.response.use(response => {
     store.state.rs = [];
     store.state.user = '';
     router.replace({ path: "/" });
+    return;
+  }
+  if(error.response.status==428){
+    Message.error(error.response.data.msg);
     return;
   }
   // Do something with response error
@@ -95,7 +104,7 @@ export const initMenu = () => {
     if (param) {
       var routes = formRouters(param.data.object);
       console.log("routers是：{}", routes);
-      //把vue路由的值赋给vue router 对象
+      //把vue路由的值赋给vue     router 对象
       router.options.routes[1].children = routes;
       console.log("vue router是：{}", router.options.routes[1].children);
       store.commit('initMenu', routes);

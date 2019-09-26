@@ -6,30 +6,56 @@
       <el-button icon="el-icon-search" @click="query" size="big" circle>查询</el-button>
       <el-button @click="dialogFormVisible = true" type="primary" size="big">添加用户</el-button>
       <el-table :data="userList" style="width: 100%">
-        <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-        <el-table-column prop="username" label="用户名" width="180"></el-table-column>
-        <el-table-column prop="phone" label="手机号码"></el-table-column>
-        <el-table-column prop="telephone" label="联系地址"></el-table-column>
+        <el-table-column prop="name" label="姓名" width="180">
+          <template slot-scope="scope">
+            <div v-html="scope.row.name">{{scope.row.name}}</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="username" label="用户名" width="180">
+           <template slot-scope="scope">
+            <div v-html="scope.row.username">{{scope.row.username}}</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="phone" label="手机号码">
+           <template slot-scope="scope">
+            <div v-html="scope.row.phone">{{scope.row.phone}}</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="telephone" label="联系地址">
+           <template slot-scope="scope">
+            <div v-html="scope.row.telephone">{{scope.row.telephone}}</div>
+          </template>
+        </el-table-column>
         <el-table-column prop="enabled" label="是否有效">
-          <template slot-scope="scope">{{scope.row.enabled==1?'是':'否' }}</template>
+          <template slot-scope="scope">
+            <div v-html="scope.row.telephone">
+            {{scope.row.enabled==1?'是':'否' }}
+            </div>
+            </template>
         </el-table-column>
         <el-table-column prop="userface" label="用户图片">
           <template slot-scope="scope">
             <img :src="scope.row.userface" width="100px" alt="没有图片" />
           </template>
         </el-table-column>
-        <el-table-column prop="namezh" label="在线职位"></el-table-column>
+        <el-table-column prop="namezh" label="在线职位">
+          <template slot-scope="scope">
+            <div v-html="scope.row.namezh">{{scope.row.namezh}}</div>
+          </template>
+        </el-table-column>
 
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
+            
             <el-button @click="handleClick(scope.row)" type="text" size="small">授权</el-button>
+            <el-button @click="updateClick(scope.row)" type="text" size="small">修改</el-button>
           </template>
         </el-table-column>
       </el-table>
       <div align="center">
         <el-pagination
           @current-change="list"
-          :current-page="pagination.current"
+          :current-page="pagination.current+1"
           :page-count="pagination.pages"
         ></el-pagination>
 
@@ -68,6 +94,7 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </el-form-item>
+            
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -75,8 +102,56 @@
           </div>
         </el-dialog>
 
+
+
+        <el-dialog title="修改用户" :visible.sync="dialogFormVisible2">
+          <el-form :model="updateBean">
+            <el-form-item label="姓名">
+              <el-input v-model="updateBean.name" style="width:300px;"></el-input>
+            </el-form-item>
+            <el-form-item label="用户名">
+              <el-input v-model="updateBean.username" style="width:300px;"></el-input>
+              <span style="color:red;">{{checkname}}</span>
+            </el-form-item>
+            <el-form-item label="手机号码">
+              <el-input v-model="updateBean.phone" style="width: 300px;"></el-input>
+            </el-form-item>
+            <el-form-item label="住宅电话">
+              <el-input v-model="updateBean.telephone" style="width: 300px;"></el-input>
+            </el-form-item>
+            <el-form-item label="联系地址">
+              <el-input v-model="updateBean.address" style="width: 300px;"></el-input>
+            </el-form-item>
+
+            <el-form-item label="景点图片">
+              <el-upload
+                :http-request="uploadUserFace1"
+                class="avatar-uploader"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess1"
+                :before-upload="beforeAvatarUpload"
+                action="https://jsonplaceholder.typicode.com/posts/"
+              >
+                <img v-if="updateBean.userface" :src="updateBean.userface" class="avatar" />
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </el-form-item>
+            
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible2 = false">取 消</el-button>
+            <el-button type="primary" @click="updateUser">确 定</el-button>
+          </div>
+        </el-dialog>
+
+
+        
+       
+
+
+
         <el-dialog title="授权" :visible.sync="dialogFormVisible1" >
-          <el-checkbox-group v-model="rids" >
+          <el-checkbox-group v-model="changeRole.rids" >
             <el-checkbox   v-for="item in roles" :label="item.id" >{{item.nameZh}}</el-checkbox>
           </el-checkbox-group>
 
@@ -100,12 +175,19 @@ export default {
       pagination: [],
       dialogFormVisible: false,
       dialogFormVisible1: false,
+      dialogFormVisible2:false,
       addBean: {
-        userface: ""
+        userface: "",
+        
       },
+      updateBean: {
+        userface: "",
+        
+      },
+       
       checkname: "",
       roles: [],
-      rids: [],
+      
       //授权的对象
       changeRole:{
         id:"",
@@ -116,30 +198,73 @@ export default {
   },
   mounted() {
     this.list(1);
-    
+    this.showAllRoles();
   },
   methods: {
     list(page) {
       var self = this;
       this.$ajax
-        .get("http://localhost:8080/user/selectUserByUsername?pageNum=" + page)
+        .get("http://localhost:8080/user/esUse?pageNum=" + (page-1)+"&name="+ this.username)
         .then(function(res) {
           console.log("============={}", res.data.object);
-          self.userList = res.data.object.records;
-          self.pagination = res.data.object;
+          //self.userList = res.data.object.records;
+          //self.pagination = res.data.object;
+           self.userList = res.data.object.content;
+           self.pagination.current = res.data.object.number;
+           self.pagination.pages = res.data.object.totalPages;
         });
     },
     query() {
       var self = this;
       this.$ajax
         .get(
-          "http://localhost:8080/user/selectUserByUsername?pageNum=1&username=" +
+          "http://localhost:8080/user/esUse?pageNum=0&name=" +
             this.username
         )
         .then(function(res) {
-          self.userList = res.data.object.records;
-          self.pagination = res.data.object;
+          console.log(res.data.object.content);
+          self.userList = res.data.object.content;
+          //self.pagination = res.data.object.pageable;
+          self.pagination.current = res.data.object.number;
+          self.pagination.pages = res.data.object.totalPages;
         });
+    },
+    updateClick (row){
+      var self = this;
+      self.dialogFormVisible2 = true;
+
+      axios
+        .get(
+          "http://localhost:8080/user/getByid?id=" +
+            row.id
+        )
+        .then(function(res) {
+          console.log(res);
+           self.updateBean = res.data.object;
+        })
+    },
+
+    
+    updateUser (){
+      var self = this;//updateUser
+
+       this.$ajax({
+        url: "http://localhost:8080/user/updateUser",
+        method: "put",
+        params: self.updateBean,
+      }).then(function(res) {
+        if (res.data.code) {
+          alert("修改成功");
+          self.dialogFormVisible2 = false;
+          self.updateBean = {};
+          self.list(1);
+        } else {
+          alert("修改失败");
+          self.dialogFormVisible2 = false;
+        }
+      });
+     
+
     },
 
     //开始授权
@@ -147,11 +272,11 @@ export default {
       
       var self = this;
       self.changeRole.id = row.id;
-      this.showAllRoles();
+      
       this.dialogFormVisible1 = true;
-       axios.get("http://localhost:8080/user/selectRoleByUid?uid="+row.id).then(function(res) {
+       axios.get("http://localhost:8080/user/Role/selectRoleByUid?uid="+row.id).then(function(res) {
          console.log("000000000000000000000"+res.data.object);
-        self.rids = res.data.object;
+        self.changeRole.rids = res.data.object;
         console.log(self.rids);
       });
     },
@@ -159,16 +284,16 @@ export default {
     giveRole (){//giveRole
       
        var self = this;
-       self.changeRole.rids = this.rids;
+       
        console.log(this.changeRole);
-       let config = { headers: { "Content-Type": "multipart/form-data" } };
+       
        self.$ajax({
-                url: 'http://localhost:8080/user/giveRole?id='+self.changeRole.id+"&rids="+self.changeRole.rids,
+                url: 'http://localhost:8080/user/Role/giveRole?id='+self.changeRole.id+"&rids="+self.changeRole.rids,
                 method: 'post', 
             }).then(function(res){
 
          if(res){
-           self.$message("授权成功");
+           self.$message("添加成功");
            self.dialogFormVisible1 = false;
            self.list(1);
           }else{
@@ -201,16 +326,18 @@ export default {
           }
           self.checkname = "";
         });
-      console.log("穿进去的对象是：{}", this.addBean);
-      var bean = this.addBean;
+         
+      console.log("穿进去的对象是：{}", self.addBean);
+       
       this.$ajax({
         url: "http://localhost:8080/user/addUser",
         method: "post",
-        params: bean
+        params: self.addBean,
       }).then(function(res) {
-        if (res.data.object) {
+        if (res.data.code) {
           alert("添加成功");
           self.dialogFormVisible = false;
+          self.checkname="";
           self.addBean = {};
           self.list(1);
         } else {
@@ -232,14 +359,31 @@ export default {
           self.addBean.userface = res.data.url;
         });
     },
+    uploadUserFace1(file) {
+      var self = this;
+      let formData = new FormData();
+      formData.append("file", file.file);
+
+      let config = { headers: { "Content-Type": "multipart/form-data" } };
+      self.$ajax
+        .post("http://localhost:8080/user/upload", formData, config)
+        .then(function(res) {
+          self.updateBean.userface = res.data.url;
+        });
+    },
 
     handleAvatarSuccess: function(res, file) {
       this.addBean.userface = file.response.url;
       console.log(file.response.url);
     },
+    handleAvatarSuccess1: function(res, file) {
+      this.updateBean.userface = file.response.url;
+      console.log(file.response.url);
+    },
     beforeAvatarUpload: function(file) {
       return file;
     }
+    
   }
 };
 </script>
