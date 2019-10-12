@@ -6,17 +6,17 @@
       <el-button icon="el-icon-search" @click="query" size="big" circle>查询</el-button>
       <el-button @click="dialogFormVisible = true" type="primary" size="big">添加用户</el-button>
       <el-table :data="userList" style="width: 100%">
-        <el-table-column prop="name" label="姓名" width="180">
+        <el-table-column prop="name" label="姓名" width="100px">
           <template slot-scope="scope">
             <div v-html="scope.row.name">{{scope.row.name}}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="用户名" width="180">
+        <el-table-column prop="username" label="用户名" width="100px">
            <template slot-scope="scope">
             <div v-html="scope.row.username">{{scope.row.username}}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="phone" label="手机号码">
+        <el-table-column prop="phone" label="手机号码" >
            <template slot-scope="scope">
             <div v-html="scope.row.phone">{{scope.row.phone}}</div>
           </template>
@@ -44,11 +44,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column fixed="right" label="操作" width="100">
+        <el-table-column fixed="right" label="操作" width="180">
           <template slot-scope="scope">
             
             <el-button @click="handleClick(scope.row)" type="text" size="small">授权</el-button>
             <el-button @click="updateClick(scope.row)" type="text" size="small">修改</el-button>
+            <el-button @click="resetPwdClick(scope.row)" type="text" size="small">重置密码</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -201,6 +202,21 @@ export default {
     this.showAllRoles();
   },
   methods: {
+    resetPwdClick (row){
+        var self  =this;
+        var ret = confirm("确定重置密码吗？");
+        if(ret){
+             axios.get("http://localhost:8080/user/resetPwd?id="+row.id).then(function(res){
+                if(res.data.object){
+                  self.$message("发送成功");
+                }else{
+                  self.$message("发送失败");
+                }
+             })
+        }
+     
+    },
+
     list(page) {
       var self = this;
       this.$ajax

@@ -112,7 +112,7 @@ export default {
           params: this.ruleForm
         }).then(function(res) {
           console.log("认证请求返回结果为:{}", res);
-          $this.$message(res.data.msg);
+          $this.$message(res.data.object);
           if (res.data.code == 200) {
             //并且使用vuex 保存状态信息
             $this.$store.commit("login", res.data.object);

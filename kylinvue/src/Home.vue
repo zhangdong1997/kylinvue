@@ -8,7 +8,7 @@
           <i class="el-icon-setting" style="margin-right: 15px"></i>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item >注销</el-dropdown-item>
-            <el-dropdown-item >重置密码</el-dropdown-item>
+            
           </el-dropdown-menu>
         </el-dropdown>
       </el-header>
