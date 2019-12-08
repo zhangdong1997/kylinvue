@@ -84,10 +84,12 @@ export default {
         children: "menuList",
         label: "name"
       },
-      mid:""
+      mid:"",
+      parms:""
     };
   },
   mounted() {
+    this.parms = {"access_token":localStorage.getItem("access_token")};
     this.list(1);
     //查询所有的角色标识
     this.getName();
@@ -96,7 +98,7 @@ export default {
     list(page) {
       var self = this;
       axios
-        .get("http://localhost:8080/role/page?pageNum=" + page)
+        .get("http://localhost:8080/api/role/page?pageNum=" + page+"&grant_type=password"+"&access_token="+this.parms.access_token)
         .then(function(res) {
           self.roleList = res.data.object.records;
           self.pagination = res.data.object;

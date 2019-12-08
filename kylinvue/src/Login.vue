@@ -66,7 +66,9 @@ export default {
         username: "lisi",
         password: "123456",
         randomStr: "",
+        grant_type:'password',
         code: ""
+        
       },
       rules: {
         username: [
@@ -97,6 +99,27 @@ export default {
       this.ruleForm.randomStr = randomStr;
     },
 
+    getUserInfo(){
+      var $this = this;
+      var parms = {"access_token":localStorage.getItem("access_token")};
+      console.log(parms);
+      this.$ajax({
+          url: "http://localhost:8080/api/user/info",
+          method: "get", // default
+          params: parms
+        }).then(function(res) {
+          console.log('oauth2.0請求成功{}',res);
+          $this.$message(res.data.msg);
+          if (res.data.code == 200) {
+            $this.$message(res.data.msg);
+            //并且使用vuex 保存状态信息
+            $this.$store.commit("login", res.data.object);
+            //通过路由跳转页面
+            $this.$router.replace({ path: "/home" });
+          }
+        })
+    },
+
    
 
 
@@ -107,17 +130,21 @@ export default {
         }
         var $this = this;
         this.$ajax({
-          url: "http://localhost:9999/oauth/login",
+          url: "http://localhost:9999/auth/oauth/token",
           method: "post", // default
-          params: this.ruleForm
+          params: this.ruleForm,
+          auth: {
+            username: 'android',
+            password: 'android'
+          }
         }).then(function(res) {
           console.log("认证请求返回结果为:{}", res);
-          $this.$message(res.data.object);
-          if (res.data.code == 200) {
-            //并且使用vuex 保存状态信息
-            $this.$store.commit("login", res.data.object);
-            //通过路由跳转页面
-            $this.$router.replace({ path: "/home" });
+          
+           if(res.data.access_token){
+            localStorage.setItem("access_token",res.data.access_token);
+            alert(res.data.access_token);
+            $this.getUserInfo();
+            console.log({"access_token":localStorage.getItem("access_token")}.access_token);
           }
         });
       });

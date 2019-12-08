@@ -4,7 +4,7 @@
       <el-header class="home-header">
         <span class="home_title">快速开发平台</span>
         <el-dropdown @command="handleCommand">
-          <span>{{this.$store.state.user.username}}</span>
+          <span>{{this.$store.state.user.name}}</span>
           <i class="el-icon-setting" style="margin-right: 15px"></i>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item >注销</el-dropdown-item>
@@ -40,10 +40,12 @@
 import axios from "axios";
 export default {
   data() {
-    return {};
+    return {
+      parms:""
+    };
   },
   mounted() {
-   
+    this.parms = {"access_token":localStorage.getItem("access_token")};
   },
   methods:{
     handleCommand (){
@@ -51,7 +53,7 @@ export default {
       var $this = this;
           this.$ajax({
               method:'get',
-              url: 'http://localhost:8080/my/logout'
+              url: 'http://localhost:8080/api/my/logout?grant_type=password'+'&access_token='+this.parms.access_token
           }).then(function(res){
               console.log(res);
              $this.$message(res.data.msg);

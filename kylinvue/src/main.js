@@ -14,6 +14,10 @@ import axios from 'axios'
 import store from './store'
 Vue.use(ElementUI);
 Vue.use(vueRouter);
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 Vue.prototype.$ajax = axios;
 axios.defaults.withCredentials = true
 const routes = [
@@ -71,8 +75,8 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  var username = store.state.user.username;
-  console.log("username==============={}"+store.state.user.username);
+  var username = store.state.user.name;
+  console.log("username==============={}"+store.state.user.name);
   if (username == "尚未登录" || username==undefined) {
     next({ path: "/" });
     return;
@@ -97,8 +101,9 @@ router.beforeEach((to, from, next) => {
 //初始化菜单
 export const initMenu = () => {
   axios({
-    url: "http://localhost:8080/menu/getMenuByUsername",
+    url: "http://localhost:8080/api/menu/getMenuByUsername",
     method: "get",
+    params:{"access_token":localStorage.getItem("access_token")},
   }).then(function (param) {
     console.log("11111111111{}", param);
     if (param) {

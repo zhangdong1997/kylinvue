@@ -174,6 +174,7 @@ export default {
       userList: [],
       username: "",
       pagination: [],
+      parms:"",
       dialogFormVisible: false,
       dialogFormVisible1: false,
       dialogFormVisible2:false,
@@ -198,15 +199,18 @@ export default {
     };
   },
   mounted() {
+    this.parms = {"access_token":localStorage.getItem("access_token")};
+    
     this.list(1);
     this.showAllRoles();
+    
   },
   methods: {
     resetPwdClick (row){
         var self  =this;
         var ret = confirm("确定重置密码吗？");
         if(ret){
-             axios.get("http://localhost:8080/user/resetPwd?id="+row.id).then(function(res){
+             axios.get("http://localhost:8080/api/user/resetPwd?id="+row.id+this.parms).then(function(res){
                 if(res.data.object){
                   self.$message("发送成功");
                 }else{
@@ -219,8 +223,12 @@ export default {
 
     list(page) {
       var self = this;
-      this.$ajax
-        .get("http://localhost:8080/user/esUse?pageNum=" + (page-1)+"&name="+ this.username)
+     
+         this.$ajax({
+          url: "http://localhost:8080/api/user/esUse?pageNum=" + (page-1)+"&name="+ this.username+"&grant_type=password",
+          method: "get", // default
+          params: this.parms
+        })
         .then(function(res) {
           console.log("============={}", res.data.object);
           //self.userList = res.data.object.records;
@@ -232,11 +240,12 @@ export default {
     },
     query() {
       var self = this;
-      this.$ajax
-        .get(
-          "http://localhost:8080/user/esUse?pageNum=0&name=" +
-            this.username
-        )
+      
+         this.$ajax({
+          url: "http://localhost:8080/api/user/esUse?pageNum=0&name="+ this.username+"&grant_type=password",
+          method: "get", // default
+          params: this.parms
+        })
         .then(function(res) {
           console.log(res.data.object.content);
           self.userList = res.data.object.content;
@@ -251,7 +260,7 @@ export default {
 
       axios
         .get(
-          "http://localhost:8080/user/getByid?id=" +
+          "http://localhost:8080/api/user/getByid?id=" +
             row.id
         )
         .then(function(res) {
@@ -265,7 +274,7 @@ export default {
       var self = this;//updateUser
 
        this.$ajax({
-        url: "http://localhost:8080/user/updateUser",
+        url: "http://localhost:8080/api/user/updateUser",
         method: "put",
         params: self.updateBean,
       }).then(function(res) {
@@ -290,7 +299,7 @@ export default {
       self.changeRole.id = row.id;
       
       this.dialogFormVisible1 = true;
-       axios.get("http://localhost:8080/user/Role/selectRoleByUid?uid="+row.id).then(function(res) {
+       axios.get("http://localhost:8080/api/user/Role/selectRoleByUid?uid="+row.id).then(function(res) {
          console.log("000000000000000000000"+res.data.object);
         self.changeRole.rids = res.data.object;
         console.log(self.rids);
@@ -304,7 +313,7 @@ export default {
        console.log(this.changeRole);
        
        self.$ajax({
-                url: 'http://localhost:8080/user/Role/giveRole?id='+self.changeRole.id+"&rids="+self.changeRole.rids,
+                url: 'http://localhost:8080/api/user/Role/giveRole?id='+self.changeRole.id+"&rids="+self.changeRole.rids,
                 method: 'post', 
             }).then(function(res){
 
@@ -322,7 +331,13 @@ export default {
     //显示说有的角色
     showAllRoles() {
       var self = this;
-      axios.get("http://localhost:8080/role/getAllRoles").then(function(res) {
+     
+       this.$ajax({
+          url: "http://localhost:8080/api/role/getAllRoles?grant_type=password",
+          method: "get", // default
+          params: this.parms
+        })
+      .then(function(res) {
         self.roles = res.data.object;
       });
     },
@@ -331,7 +346,7 @@ export default {
       var self = this;
       axios
         .get(
-          "http://localhost:8080/user/checkName?username=" +
+          "http://localhost:8080/user/api/checkName?username=" +
             this.addBean.username
         )
         .then(function(res) {
@@ -346,7 +361,7 @@ export default {
       console.log("穿进去的对象是：{}", self.addBean);
        
       this.$ajax({
-        url: "http://localhost:8080/user/addUser",
+        url: "http://localhost:8080/api/user/addUser",
         method: "post",
         params: self.addBean,
       }).then(function(res) {
@@ -370,7 +385,7 @@ export default {
 
       let config = { headers: { "Content-Type": "multipart/form-data" } };
       self.$ajax
-        .post("http://localhost:8080/user/upload", formData, config)
+        .post("http://localhost:8080/api/user/upload", formData, config)
         .then(function(res) {
           self.addBean.userface = res.data.url;
         });
@@ -382,7 +397,7 @@ export default {
 
       let config = { headers: { "Content-Type": "multipart/form-data" } };
       self.$ajax
-        .post("http://localhost:8080/user/upload", formData, config)
+        .post("http://localhost:8080/api/user/upload", formData, config)
         .then(function(res) {
           self.updateBean.userface = res.data.url;
         });

@@ -33,17 +33,19 @@ export default {
     data (){
      return {
          logList:[],
-         pagination:[]
+         pagination:[],
+         parms:""
      }   
     },
     mounted(){
+      this.parms = {"access_token":localStorage.getItem("access_token")};
        this.list(1);
     },
     methods:{
         list (page){
              var self = this;
          axios
-        .get("http://localhost:8080/log/selectAlllog?pageNum=" + (page-1))
+        .get("http://localhost:8083/api/log/selectAlllog?pageNum=" + (page-1)+"&grant_type=password"+"&access_token="+this.parms.access_token)
         .then(function(res) {
             console.log("日志"+res.data.object.content);
           self.logList = res.data.object.content;
